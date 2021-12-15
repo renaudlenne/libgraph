@@ -33,12 +33,12 @@ defmodule Graph.Pathfinding do
   the edge between it and the current vertex.
   """
   @spec a_star(Graph.t(), Graph.vertex(), Graph.vertex(), heuristic_fun) :: [Graph.vertex()] | nil
-  def a_star(%Graph{type: :directed, vertices: vs, out_edges: oe} = g, a, b, hfun)
+  def a_star(%Graph{type: :directed, vertices: vs, out_edges: oe, vertex_identifier: vertex_identifier} = g, a, b, hfun)
       when is_function(hfun, 1) do
     with a_id <- vertex_id(a),
          b_id <- vertex_id(b),
          {:ok, a_out} <- Map.fetch(oe, a_id) do
-      tree = Graph.new() |> Graph.add_vertex(a_id)
+      tree = Graph.new(vertex_identifier: vertex_identifier) |> Graph.add_vertex(a_id)
       q = PriorityQueue.new()
 
       q =
@@ -61,12 +61,12 @@ defmodule Graph.Pathfinding do
     end
   end
 
-  def a_star(%Graph{type: :undirected, vertices: vs} = g, a, b, hfun)
+  def a_star(%Graph{type: :undirected, vertices: vs, vertex_identifier: vertex_identifier} = g, a, b, hfun)
       when is_function(hfun, 1) do
     a_id = vertex_id(a)
     b_id = vertex_id(b)
     a_all_edges = all_edges(g, a_id)
-    tree = Graph.new() |> Graph.add_vertex(a_id)
+    tree = Graph.new(vertex_identifier: vertex_identifier) |> Graph.add_vertex(a_id)
     q = PriorityQueue.new()
 
     q =
@@ -121,18 +121,18 @@ defmodule Graph.Pathfinding do
 
   defp do_bfs(
          q,
-         %Graph{type: :directed, out_edges: oe} = g,
+         %Graph{type: :directed, out_edges: oe, vertex_identifier: vertex_identifier} = g,
          target_id,
          %Graph{vertices: vs_tree} = tree,
          hfun
        ) do
     case PriorityQueue.pop(q) do
       {{:value, {v_id, ^target_id, _}}, _q1} ->
-        v_id_tree = Graph.Utils.vertex_id(v_id)
+        v_id_tree = vertex_identifier.(v_id)
         construct_path(v_id_tree, tree, [target_id])
 
       {{:value, {v1_id, v2_id, v2_acc_weight}}, q1} ->
-        v2_id_tree = Graph.Utils.vertex_id(v2_id)
+        v2_id_tree = vertex_identifier.(v2_id)
 
         if Map.has_key?(vs_tree, v2_id_tree) do
           do_bfs(q1, g, target_id, tree, hfun)
