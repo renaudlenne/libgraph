@@ -90,20 +90,20 @@ defmodule Graph.Directed do
     for id <- :lists.append(forest(g, &out_neighbors/3, vs, :first)), do: Map.get(vertices, id)
   end
 
-  def reachable_neighbors(%Graph{vertices: vertices} = g, vs) when is_list(vs) do
-    vs = Enum.map(vs, &vertex_id/1)
+  def reachable_neighbors(%Graph{vertices: vertices, vertex_identifier: vertex_identifier} = g, vs) when is_list(vs) do
+    vs = Enum.map(vs, &vertex_identifier.(&1))
 
     for id <- :lists.append(forest(g, &out_neighbors/3, vs, :not_first)),
         do: Map.get(vertices, id)
   end
 
-  def reaching(%Graph{vertices: vertices} = g, vs) when is_list(vs) do
-    vs = Enum.map(vs, &vertex_id/1)
+  def reaching(%Graph{vertices: vertices, vertex_identifier: vertex_identifier} = g, vs) when is_list(vs) do
+    vs = Enum.map(vs, &vertex_identifier.(&1))
     for id <- :lists.append(forest(g, &in_neighbors/3, vs, :first)), do: Map.get(vertices, id)
   end
 
-  def reaching_neighbors(%Graph{vertices: vertices} = g, vs) when is_list(vs) do
-    vs = Enum.map(vs, &vertex_id/1)
+  def reaching_neighbors(%Graph{vertices: vertices, vertex_identifier: vertex_identifier} = g, vs) when is_list(vs) do
+    vs = Enum.map(vs, &vertex_identifier.(&1))
     for id <- :lists.append(forest(g, &in_neighbors/3, vs, :not_first)), do: Map.get(vertices, id)
   end
 
